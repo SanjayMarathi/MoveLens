@@ -96,7 +96,7 @@ body[data-scene="dusk"] .brand b, body[data-scene="night"] .brand b, body[data-s
 .nav-links a:hover { color: var(--text); background: color-mix(in srgb, var(--text) 8%, transparent); }
 .nav-actions { display: flex; gap: 6px; align-items: center; }
 @media (max-width: 1040px) { .nav-links { display: none; } }
-@media (max-width: 520px) { .topbar { padding: 0 12px; } .nav-actions .lbl { display: none; } .brand { font-size: 19px; } }
+@media (max-width: 520px) { .topbar { padding: 0 12px; } .nav-actions .lbl { display: none; } .brand { font-size: 19px; } #keys-btn { display: none; } }
 
 /* ============================================================ 4. landing */
 main { max-width: 1320px; margin: 0 auto; padding: 0 20px 40px; container-type: inline-size; }
@@ -227,6 +227,7 @@ table.depth { border-collapse: collapse; width: 100%; max-width: 640px; margin: 
 table.depth td, table.depth th { text-align: left; padding: 8px 10px; border-bottom: 1px solid var(--line); }
 table.depth th { color: var(--text); font-size: 12.5px; text-transform: uppercase; letter-spacing: .5px; }
 table.depth td { color: var(--muted); }
+@media (max-width: 520px) { table.depth { display: block; overflow-x: auto; } }
 
 footer.site { margin: 34px 0 0; padding: 26px 8px 8px; color: var(--hero-sub); text-shadow: var(--hero-shadow); font-size: 13.5px; line-height: 1.7; display: grid; grid-template-columns: 1.4fr 1fr; gap: 24px; }
 footer.site a { text-decoration: underline; text-underline-offset: 3px; }
@@ -304,6 +305,18 @@ svg.overlay { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 
 .promo.up { flex-direction: column-reverse; }
 .promo button { aspect-ratio: 1; border: 0; background-size: 86% 86%; background-position: center; background-repeat: no-repeat; background-color: transparent; border-radius: 6px; cursor: pointer; padding: 0; }
 .promo button:hover { background-color: #d8e8c0; }
+
+/* Phones and tablets: the move buttons are pinned to the bottom of the screen (the copy inside the panel is hidden) */
+#mnav { display: none; }
+@media (max-width: 960px) {
+  body.reviewing #mnav { display: grid; grid-template-columns: repeat(5, 1fr); gap: 8px; position: fixed; left: 0; right: 0; bottom: 0; z-index: 45;
+                         padding: 8px 12px calc(8px + env(safe-area-inset-bottom)); background: var(--panel-solid); border-top: 1px solid var(--line); box-shadow: 0 -8px 24px rgba(0, 0, 0, .2); }
+  #mnav .btn { padding: 15px 0; border-radius: 12px; box-shadow: 0 3px 0 color-mix(in srgb, var(--line) 90%, #000); }
+  #mnav .btn svg { width: 24px; height: 24px; }
+  .rv-side .controls { display: none; }
+  main.reviewing { padding-bottom: 96px; }                 /* room so the bar never covers the end of the page */
+  body.reviewing .toast { bottom: 92px; }
+}
 
 /* side panel */
 .panel-head { flex: none; display: flex; align-items: center; justify-content: space-between; gap: 8px; padding: 10px 12px 10px 8px; border-bottom: 1px solid var(--line); }

@@ -103,6 +103,12 @@ export function initReview(h) {
   $("c-next").onclick = stepNext;
   $("c-last").onclick = () => goPly(S.result.moves.length);
   $("c-play").onclick = toggleAuto;
+  // the same five actions on the bar pinned to the bottom of the screen (phones and tablets)
+  $("m-first").onclick = () => goPly(0);
+  $("m-prev").onclick = stepPrev;
+  $("m-next").onclick = stepNext;
+  $("m-last").onclick = () => goPly(S.result.moves.length);
+  $("m-play").onclick = toggleAuto;
 
   $("x-undo").onclick = stepPrev;
   $("x-reset").onclick = backToGame;
@@ -226,11 +232,14 @@ function toggleAuto() {
     S.ply = p; S.line = []; S.li = 0; S.retry = null; S.showBest = false;
     render(); soundForSan(S.result.moves[p - 1].san);
   }, 1250);
-  $("c-play").querySelector("use").setAttribute("href", "#i-pause");
+  setPlayIcon("#i-pause");
+}
+function setPlayIcon(icon) {                              // both play buttons (panel and bottom bar) show the same icon
+  for (const id of ["c-play", "m-play"]) $(id)?.querySelector("use")?.setAttribute("href", icon);
 }
 function stopAuto() {
   if (S.auto) { clearInterval(S.auto); S.auto = null; }
-  $("c-play")?.querySelector("use")?.setAttribute("href", "#i-play");
+  setPlayIcon("#i-play");
 }
 
 function setTab(name, silent) {
