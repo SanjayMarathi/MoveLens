@@ -1,0 +1,331 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>MoveLens · Free Chess Game Review</title>
+<meta name="description" content="Paste a game or import it from Chess.com or Lichess. Stockfish labels every move from Brilliant to Blunder, shows the better move, and lets you play on the board to test your ideas.">
+<meta name="theme-color" content="#4b9be0">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2381b64c'/%3E%3Cpath d='M0 0h16v16H0zM16 16h16v16H16z' fill='%23ebecd0'/%3E%3Ccircle cx='20' cy='12' r='6' fill='none' stroke='%23fff' stroke-width='2.6'/%3E%3Cpath d='M24.5 16.5 29 21' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+<link rel="manifest" href="/manifest.webmanifest">
+<link rel="apple-touch-icon" href="/static/icon-192.png">
+<link rel="stylesheet" href="/static/css/app.css">
+<style id="piece-css"></style>
+</head>
+<body data-scene="sky">
+
+<!-- icon sprite -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <symbol id="i-check" viewBox="0 0 24 24"><path d="M9 16.2 4.8 12l-1.4 1.4L9 19 21 7l-1.4-1.4z"/></symbol>
+  <symbol id="i-play" viewBox="0 0 24 24"><path d="M8 5v14l11-7z"/></symbol>
+  <symbol id="i-pause" viewBox="0 0 24 24"><path d="M6 5h4v14H6zM14 5h4v14h-4z"/></symbol>
+  <symbol id="i-prev" viewBox="0 0 24 24"><path d="M15.4 7.4 14 6l-6 6 6 6 1.4-1.4L10.8 12z"/></symbol>
+  <symbol id="i-next" viewBox="0 0 24 24"><path d="M8.6 16.6 10 18l6-6-6-6-1.4 1.4L13.2 12z"/></symbol>
+  <symbol id="i-first" viewBox="0 0 24 24"><path d="M6 6h2v12H6zm3.5 6 8.5 6V6z"/></symbol>
+  <symbol id="i-last" viewBox="0 0 24 24"><path d="M6 18l8.5-6L6 6zM16 6v12h2V6z"/></symbol>
+  <symbol id="i-flip" viewBox="0 0 24 24"><path d="M16 17.01V10h-2v7.01h-3L15 21l4-3.99zM9 3 5 6.99h3V14h2V6.99h3z"/></symbol>
+  <symbol id="i-bulb" viewBox="0 0 24 24"><path d="M9 21c0 .55.45 1 1 1h4c.55 0 1-.45 1-1v-1H9zm3-19C8.14 2 5 5.14 5 9c0 2.38 1.19 4.47 3 5.74V17c0 .55.45 1 1 1h6c.55 0 1-.45 1-1v-2.26c1.81-1.27 3-3.36 3-5.74 0-3.86-3.14-7-7-7z"/></symbol>
+  <symbol id="i-star" viewBox="0 0 24 24"><path d="M12 17.27 18.18 21l-1.64-7.03L22 9.24l-7.19-.61L12 2 9.19 8.63 2 9.24l5.46 4.73L5.82 21z"/></symbol>
+  <symbol id="i-retry" viewBox="0 0 24 24"><path d="M12 5V1L7 6l5 5V7c3.31 0 6 2.69 6 6s-2.69 6-6 6-6-2.69-6-6H4c0 4.42 3.58 8 8 8s8-3.58 8-8-3.58-8-8-8z"/></symbol>
+  <symbol id="i-arrow" viewBox="0 0 24 24"><path d="M12 4l-1.41 1.41L16.17 11H4v2h12.17l-5.58 5.59L12 20l8-8z"/></symbol>
+  <symbol id="i-back" viewBox="0 0 24 24"><path d="M20 11H7.83l5.59-5.59L12 4l-8 8 8 8 1.41-1.41L7.83 13H20z"/></symbol>
+  <symbol id="i-vol" viewBox="0 0 24 24"><path d="M3 9v6h4l5 5V4L7 9H3zm13.5 3A4.5 4.5 0 0 0 14 7.97v8.05c1.48-.73 2.5-2.25 2.5-4.02zM14 3.23v2.06c2.89.86 5 3.54 5 6.71s-2.11 5.85-5 6.71v2.06c4.01-.91 7-4.49 7-8.77s-2.99-7.86-7-8.77z"/></symbol>
+  <symbol id="i-mute" viewBox="0 0 24 24"><path d="M16.5 12A4.5 4.5 0 0 0 14 7.97v2.21l2.45 2.45c.03-.2.05-.41.05-.63zm2.5 0c0 .94-.2 1.82-.54 2.64l1.51 1.51A8.8 8.8 0 0 0 21 12c0-4.28-2.99-7.86-7-8.77v2.06c2.89.86 5 3.54 5 6.71zM4.27 3 3 4.27 7.73 9H3v6h4l5 5v-6.73l4.25 4.25c-.67.52-1.42.93-2.25 1.18v2.06a8.99 8.99 0 0 0 3.69-1.81L19.73 21 21 19.73l-9-9L4.27 3zM12 4 9.91 6.09 12 8.18V4z"/></symbol>
+  <symbol id="i-palette" viewBox="0 0 24 24"><path d="M12 3a9 9 0 0 0 0 18c.83 0 1.5-.67 1.5-1.5 0-.39-.15-.74-.39-1.01-.23-.26-.38-.61-.38-.99 0-.83.67-1.5 1.5-1.5H16c2.76 0 5-2.24 5-5 0-4.42-4.03-8-9-8zm-5.5 9c-.83 0-1.5-.67-1.5-1.5S5.67 9 6.5 9 8 9.67 8 10.5 7.33 12 6.5 12zm3-4C8.67 8 8 7.33 8 6.5S8.67 5 9.5 5s1.5.67 1.5 1.5S10.33 8 9.5 8zm5 0c-.83 0-1.5-.67-1.5-1.5S13.67 5 14.5 5s1.5.67 1.5 1.5S15.33 8 14.5 8zm3 4c-.83 0-1.5-.67-1.5-1.5S16.67 9 17.5 9s1.5.67 1.5 1.5-.67 1.5-1.5 1.5z"/></symbol>
+  <symbol id="i-plus" viewBox="0 0 24 24"><path d="M19 13h-6v6h-2v-6H5v-2h6V5h2v6h6z"/></symbol>
+  <symbol id="i-search" viewBox="0 0 24 24"><path d="M15.5 14h-.79l-.28-.27A6.47 6.47 0 0 0 16 9.5 6.5 6.5 0 1 0 9.5 16c1.61 0 3.09-.59 4.23-1.57l.27.28v.79l5 4.99L20.49 19zm-6 0C7.01 14 5 11.99 5 9.5S7.01 5 9.5 5 14 7.01 14 9.5 11.99 14 9.5 14z"/></symbol>
+  <symbol id="i-upload" viewBox="0 0 24 24"><path d="M9 16h6v-6h4l-7-7-7 7h4zm-4 2h14v2H5z"/></symbol>
+  <symbol id="i-download" viewBox="0 0 24 24"><path d="M5 20h14v-2H5zM19 9h-4V3H9v6H5l7 7z"/></symbol>
+  <symbol id="i-copy" viewBox="0 0 24 24"><path d="M16 1H4c-1.1 0-2 .9-2 2v14h2V3h12zm3 4H8c-1.1 0-2 .9-2 2v14c0 1.1.9 2 2 2h11c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm0 16H8V7h11z"/></symbol>
+  <symbol id="i-link" viewBox="0 0 24 24"><path d="M3.9 12c0-1.71 1.39-3.1 3.1-3.1h4V7H7c-2.76 0-5 2.24-5 5s2.24 5 5 5h4v-1.9H7c-1.71 0-3.1-1.39-3.1-3.1zM8 13h8v-2H8zm9-6h-4v1.9h4c1.71 0 3.1 1.39 3.1 3.1s-1.39 3.1-3.1 3.1h-4V17h4c2.76 0 5-2.24 5-5s-2.24-5-5-5z"/></symbol>
+  <symbol id="i-close" viewBox="0 0 24 24"><path d="M19 6.41 17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"/></symbol>
+  <symbol id="i-keyboard" viewBox="0 0 24 24"><path d="M20 5H4c-1.1 0-1.99.9-1.99 2L2 17c0 1.1.9 2 2 2h16c1.1 0 2-.9 2-2V7c0-1.1-.9-2-2-2zm-9 3h2v2h-2zm0 3h2v2h-2zM8 8h2v2H8zm0 3h2v2H8zm-1 2H5v-2h2zm0-3H5V8h2zm9 7H8v-2h8zm0-4h-2v-2h2zm0-3h-2V8h2zm3 3h-2v-2h2zm0-3h-2V8h2z"/></symbol>
+  <symbol id="i-bolt" viewBox="0 0 24 24"><path d="M11 21h-1l1-7H7.5c-.58 0-.57-.32-.38-.66.19-.34.05-.08.07-.12C8.48 10.94 10.42 7.54 13 3h1l-1 7h3.5c.49 0 .56.33.47.51l-.07.15C12.96 17.55 11 21 11 21z"/></symbol>
+  <symbol id="i-book" viewBox="0 0 24 24"><path d="M21 5c-1.11-.35-2.33-.5-3.5-.5-1.95 0-4.05.4-5.5 1.5-1.45-1.1-3.55-1.5-5.5-1.5S2.45 4.9 1 6v14.65c0 .25.25.5.5.5.1 0 .15-.05.25-.05C3.1 20.45 5.05 20 6.5 20c1.95 0 4.05.4 5.5 1.5 1.35-.85 3.8-1.5 5.5-1.5 1.65 0 3.35.3 4.75 1.05.1.05.15.05.25.05.25 0 .5-.25.5-.5V6c-.6-.45-1.25-.75-2-1zm0 13.5c-1.1-.35-2.3-.5-3.5-.5-1.7 0-4.15.65-5.5 1.5V8c1.35-.85 3.8-1.5 5.5-1.5 1.2 0 2.4.15 3.5.5v11.5z"/></symbol>
+  <symbol id="i-chart" viewBox="0 0 24 24"><path d="M3 3v18h18v-2H5V3zm4 12h2v3H7zm4-4h2v7h-2zm4-3h2v10h-2z"/></symbol>
+  <symbol id="i-history" viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8z"/></symbol>
+  <symbol id="i-grid" viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></symbol>
+  <symbol id="i-flag" viewBox="0 0 24 24"><path d="M14.4 6 14 4H5v17h2v-7h5.6l.4 2h7V6z"/></symbol>
+  <symbol id="i-info" viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></symbol>
+</defs></svg>
+
+<div class="scene" aria-hidden="true"></div>
+
+<header class="topbar">
+  <a class="brand" href="#top" id="brand" aria-label="MoveLens home">
+    <svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#81b64c"/><path d="M0 0h16v16H0zM16 16h16v16H16z" fill="#ebecd0" opacity=".96"/><circle cx="20" cy="12" r="6" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M24.5 16.5 29 21" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>
+    <span>Move<b>Lens</b></span>
+  </a>
+  <nav class="nav-links" id="nav-links" aria-label="Sections">
+    <a href="#how">How it works</a><a href="#features">Features</a><a href="#labels">Move labels</a><a href="#play">Play on the board</a><a href="#themes">Themes</a><a href="#faq">FAQ</a>
+  </nav>
+  <div class="nav-actions">
+    <button class="btn btn-ghost" id="sound-btn" title="Sound on/off (S)" aria-label="Toggle sound"><svg class="icon"><use href="#i-vol"/></svg></button>
+    <button class="btn btn-ghost" id="theme-btn" aria-haspopup="dialog" aria-expanded="false" title="Themes"><svg class="icon"><use href="#i-palette"/></svg><span class="lbl">Themes</span></button>
+    <button class="btn btn-ghost" id="keys-btn" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts"><svg class="icon"><use href="#i-keyboard"/></svg></button>
+    <button class="btn btn-primary hidden" id="new-btn" style="padding:8px 14px;box-shadow:0 3px 0 var(--accent-shadow)"><svg class="icon"><use href="#i-plus"/></svg><span class="lbl">New review</span></button>
+  </div>
+</header>
+
+<main id="main">
+<!-- ================================================================= LANDING -->
+<div id="landing">
+  <section class="hero" id="top">
+    <div class="hero-copy">
+      <span class="eyebrow">Free chess game review</span>
+      <h1>See every move <em>for what it really was.</em></h1>
+      <p class="lead">Paste a game, or pull it straight from Chess.com or Lichess. Stockfish checks every position, labels each move from Brilliant to Blunder, and shows you the better one. Then play on the board to test your own ideas.</p>
+      <ul class="hero-points">
+        <li><span class="tick"><svg><use href="#i-check"/></svg></span>Every move labelled</li>
+        <li><span class="tick"><svg><use href="#i-check"/></svg></span>Play any position yourself</li>
+        <li><span class="tick"><svg><use href="#i-check"/></svg></span>Retry your mistakes</li>
+        <li><span class="tick"><svg><use href="#i-check"/></svg></span>No sign-up</li>
+      </ul>
+      <div class="demo" aria-label="Live demo of a review">
+        <div class="board-box"><div class="board static" id="demo-board" style="--bs:216px"></div></div>
+        <div class="demo-note" id="demo-note" aria-live="polite"></div>
+      </div>
+    </div>
+
+    <div class="start-card" id="start">
+      <h2>Review a game</h2>
+      <div id="wake" class="alert info hidden" role="status"><b>The server is waking up.</b> A free host sleeps when nobody has used it for a while; this takes about a minute. Saved reviews and the sample game work meanwhile.</div>
+      <div class="source-tabs" role="tablist" aria-label="Where is your game?">
+        <button role="tab" data-src="pgn" aria-selected="true">Paste PGN</button>
+        <button role="tab" data-src="chesscom" aria-selected="false">Chess.com</button>
+        <button role="tab" data-src="lichess" aria-selected="false">Lichess</button>
+      </div>
+
+      <div id="pane-pgn">
+        <label class="sr-only" for="pgn">Game in PGN format</label>
+        <textarea id="pgn" spellcheck="false" placeholder='[White "You"]&#10;[Black "Opponent"]&#10;&#10;1. e4 e5 2. Nf3 Nc6 3. Bb5 a6 ...'></textarea>
+        <div class="pane-hint">
+          <button class="link" id="sample-btn" type="button">Try a famous game</button>
+          <label class="link" style="cursor:pointer">Upload a .pgn file<input type="file" id="pgn-file" accept=".pgn,.txt" hidden></label>
+          <span>or just paste the moves: <code>1. e4 e5 2. Nf3</code></span>
+        </div>
+      </div>
+
+      <div id="pane-import" class="hidden">
+        <form class="finder" id="finder">
+          <label class="sr-only" for="find-user">Username</label>
+          <input type="text" id="find-user" placeholder="Your username" autocomplete="off" autocapitalize="off" spellcheck="false">
+          <button class="btn" type="submit" id="find-btn"><svg class="icon"><use href="#i-search"/></svg>Find games</button>
+        </form>
+        <div class="games" id="games" role="listbox" aria-label="Recent games"></div>
+        <div class="pane-hint"><span>Shows the 20 most recent standard games. Pick one to review it.</span></div>
+      </div>
+
+      <div class="options">
+        <label class="field"><span>Your username <small style="text-transform:none;letter-spacing:0;font-weight:500">(optional)</small></span>
+          <input type="text" id="me" placeholder="e.g. Sanjaymarathi" autocomplete="off" autocapitalize="off" spellcheck="false"></label>
+        <fieldset class="field"><legend>View the board from</legend>
+          <div class="seg" id="view-seg" role="group" aria-label="Board orientation">
+            <button type="button" data-view="auto" aria-pressed="true">Auto</button>
+            <button type="button" data-view="white" aria-pressed="false">White</button>
+            <button type="button" data-view="black" aria-pressed="false">Black</button>
+          </div>
+        </fieldset>
+        <small class="field wide" id="view-hint" style="grid-column:1/-1;margin-top:-6px"></small>
+        <label class="field wide"><span>Analysis depth</span>
+          <select id="quality">
+            <option value="fast">Fast: quick look</option>
+            <option value="standard">Standard: balanced</option>
+            <option value="deep" selected>Deep: strong (recommended)</option>
+            <option value="max">Maximum: strongest, slowest</option>
+          </select><small id="depth-hint"></small></label>
+      </div>
+
+      <button class="btn btn-primary big" id="review-btn" type="button">Review game</button>
+      <div id="error" class="alert hidden" role="alert"></div>
+      <div id="progress" class="progress hidden" aria-live="polite">
+        <div class="track"><div class="fill" id="bar-fill"></div></div>
+        <p id="progress-text">Starting…</p>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet hidden" id="recent">
+    <div class="sheet-head"><span class="kicker">Your library</span><h2>Recent reviews</h2><p>Saved in this browser only, so they open instantly, even when the server has restarted.</p></div>
+    <div class="recent" id="recent-list"></div>
+  </section>
+
+  <section class="sheet" id="how">
+    <div class="sheet-head"><span class="kicker">How it works</span><h2>From pasted game to clear lessons in three steps</h2><p>No account, no setup. Bring a game and MoveLens does the rest.</p></div>
+    <div class="steps">
+      <div class="step"><div class="ico"><svg><use href="#i-download"/></svg></div><h3>Bring a game</h3>
+        <p>Paste its PGN, upload a file, or type your username under the Chess.com or Lichess tab and pick a recent game.</p>
+        <ul><li><b>Chess.com:</b> open the game → <i>Share</i> → <i>PGN</i> → Copy.</li><li><b>Lichess:</b> open the game → the <i>PGN</i> tab under the board → Copy.</li></ul></div>
+      <div class="step"><div class="ico"><svg><use href="#i-flip"/></svg></div><h3>Choose your view</h3>
+        <p>Enter your username and the board opens from your side. Or pick White or Black yourself. Then choose how deep Stockfish should look: Fast for a quick scan, Deep for a strong review, Maximum when you want the best possible answer.</p></div>
+      <div class="step"><div class="ico"><svg><use href="#i-bulb"/></svg></div><h3>Learn from it</h3>
+        <p>Step through the game with the coach, read why a move was a mistake, then play your own moves on the board and get an instant verdict. Use <b>Retry</b> to find the better move yourself.</p></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="features">
+    <div class="sheet-head"><span class="kicker">Everything in one review</span><h2>Built for understanding your games, not just scoring them</h2></div>
+    <div class="features">
+      <div class="feature"><div class="ico"><svg><use href="#i-star"/></svg></div><h3>Eleven move labels</h3><p>Brilliant, Great, Best, Excellent, Good, Book, Forced, Inaccuracy, Mistake, Miss and Blunder, shown right on the board.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-grid"/></svg></div><h3>A board you can play on</h3><p>Drag or click any piece at any point in the game. Get the engine's verdict on your move straight away, and keep playing the line.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-retry"/></svg></div><h3>Retry your mistakes</h3><p>On any mistake, press Retry. You get the position back and try to find a better move, with feedback on every attempt.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-bulb"/></svg></div><h3>Coach and explanations</h3><p>A plain-English comment for every move, the engine's preferred line, and the exact winning chances before and after.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-bolt"/></svg></div><h3>Live engine lines</h3><p>Switch on the top three engine lines for any position, including ones you create. Click a line to play it.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-chart"/></svg></div><h3>Accuracy and game phases</h3><p>An accuracy score for each player, plus how you did in the opening, the middlegame and the endgame.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-flag"/></svg></div><h3>Key moments</h3><p>Jump straight to the Brilliant moves, Mistakes and Blunders. Press <kbd>]</kbd> and <kbd>[</kbd> to move between them.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-info"/></svg></div><h3>Evaluation bar and graph</h3><p>See who is winning at every move. Click anywhere on the graph to jump there, and spot the turning point at a glance.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-book"/></svg></div><h3>3,800 named openings</h3><p>Know which opening you played and exactly when you left theory, with book moves marked.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-search"/></svg></div><h3>Import by username</h3><p>Find your latest Chess.com or Lichess games by username. No copy and paste needed.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-palette"/></svg></div><h3>Make it yours</h3><p>Four scenery backgrounds, two plain themes, twelve boards and six piece sets. Draw arrows with a right-click, and turn on sounds.</p></div>
+      <div class="feature"><div class="ico"><svg><use href="#i-history"/></svg></div><h3>Saved in your browser</h3><p>Recent reviews open instantly next time. Copy or download an annotated PGN to keep or share.</p></div>
+    </div>
+  </section>
+
+  <section class="sheet" id="labels">
+    <div class="sheet-head"><span class="kicker">Move labels</span><h2>What each label means</h2>
+      <p>Every move is compared with the engine's best move. The difference is measured in <b>winning chance</b>, the percentage chance of winning from a position, because a lost pawn matters far more in an equal game than when you are already a queen up.</p></div>
+    <div class="labels" id="label-cards"></div>
+    <div class="callout"><svg><use href="#i-info"/></svg><div><b>A note on labels.</b> No site publishes its exact rules, so MoveLens uses sensible, open thresholds. You may see a different label for a move than on another site, and that is normal. Accuracy uses the same open formula as Lichess.</div></div>
+  </section>
+
+  <section class="sheet" id="play">
+    <div class="sheet-head"><span class="kicker">Play on the board</span><h2>Don't just read the review. Test it.</h2>
+      <p>The board is live. Stop at any move, play something different, and see straight away whether it was good.</p></div>
+    <div class="two-col">
+      <ol class="how-list">
+        <li><span class="n">1</span><div><b>Move any piece</b><span>Drag it, or click it and then click the square. Legal squares are shown as dots. Pawns can promote to any piece.</span></div></li>
+        <li><span class="n">2</span><div><b>Get a verdict</b><span>Your move is labelled like the rest of the game, with the evaluation, the best move and a short explanation.</span></div></li>
+        <li><span class="n">3</span><div><b>Keep going</b><span>Play both sides, step back with the arrows, or click an engine line to follow it. <i>Back to game</i> returns you to the real moves.</span></div></li>
+        <li><span class="n">4</span><div><b>Retry a mistake</b><span>On a mistake or blunder, press <i>Retry</i>. You are put back before the move and asked to find something better.</span></div></li>
+        <li><span class="n">5</span><div><b>Mark up the position</b><span>Right-click and drag to draw arrows; right-click a square to highlight it. Hold <kbd>Shift</kbd> for red or <kbd>Alt</kbd> for blue.</span></div></li>
+      </ol>
+      <div class="mock">
+        <div class="coach-mock"><div class="mascot" style="--mascot:var(--blunder)"><i class="p-wN"></i></div>
+          <div class="bubble"><div class="top"><span class="badge lg" style="background:var(--blunder)">??</span><span class="ttl">Qxb2 is a blunder</span><span class="ev">-5.4</span></div>
+            <p>Qxb2 should lose the game. The best move was Rd1.</p></div></div>
+        <div class="actions" style="margin-bottom:0">
+          <span class="btn"><svg><use href="#i-bulb"/></svg>Explain</span><span class="btn"><svg><use href="#i-star"/></svg>Best</span>
+          <span class="btn"><svg><use href="#i-retry"/></svg>Retry</span><span class="btn btn-primary"><svg><use href="#i-arrow"/></svg>Next</span></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="sheet" id="themes">
+    <div class="sheet-head"><span class="kicker">Themes</span><h2>Make the board yours</h2><p>Pick a scene, a board and a piece set. Your choice is remembered on this device.</p></div>
+    <div class="picker" id="themes-mount"></div>
+  </section>
+
+  <section class="sheet" id="shortcuts">
+    <div class="sheet-head"><span class="kicker">Keyboard</span><h2>Shortcuts</h2></div>
+    <div class="keys" id="keys-list"></div>
+  </section>
+
+  <section class="sheet" id="faq">
+    <div class="sheet-head"><span class="kicker">Questions</span><h2>Frequently asked</h2></div>
+    <details class="faq" open><summary>Where do I find my game's PGN?</summary>
+      <ul><li><b>Chess.com:</b> open the finished game, press <i>Share</i> (the arrow icon), choose the <i>PGN</i> tab and copy it.</li>
+      <li><b>Lichess:</b> open the game, scroll below the board and copy from the <i>PGN</i> tab.</li>
+      <li>Or skip all that: use the Chess.com or Lichess tab above, type your username and pick a game.</li></ul></details>
+    <details class="faq"><summary>Is it free? Do I need an account?</summary><p>MoveLens is free and needs no account or sign-up.</p></details>
+    <details class="faq"><summary>How long does a review take, and what do the depths mean?</summary>
+      <p>The engine searches every position of your game. A deeper search finds better moves and takes longer, roughly in proportion to the number of moves. Times below are typical for a 40-move game on a fast computer; a shared free server can be slower.</p>
+      <table class="depth"><tr><th>Depth</th><th>Search</th><th>Typical time</th><th>Best for</th></tr>
+        <tr><td>Fast</td><td>12 ply, ≤0.15 s</td><td>≈ 10 s</td><td>A quick scan</td></tr>
+        <tr><td>Standard</td><td>16 ply, ≤0.4 s</td><td>≈ 30 s</td><td>Everyday review</td></tr>
+        <tr><td>Deep</td><td>20 ply, ≤1.5 s</td><td>≈ 1–2 min</td><td>Learning from a game</td></tr>
+        <tr><td>Maximum</td><td>24 ply, ≤3.5 s</td><td>≈ 3–5 min</td><td>Important games</td></tr></table></details>
+    <details class="faq"><summary>Why does a label differ from another website?</summary><p>No site publishes its exact rules for labels like Brilliant or Great, and engines differ slightly in how deep they look. MoveLens measures how much winning chance a move gives away compared with the best move, then applies the thresholds listed in the Move labels section. The idea is the same, the numbers are not identical.</p></details>
+    <details class="faq"><summary>How is accuracy calculated?</summary><p>Each move gets a score from how much winning chance it lost against the best move. The game score blends a weighted average (sharp moments count more) with a harmonic mean (which punishes any very bad move). It is the same published formula Lichess uses.</p></details>
+    <details class="faq"><summary>Can I view the board from Black's side?</summary><p>Yes. Choose <b>Black</b> under "View the board from", or type your username and leave it on Auto: MoveLens finds which side you played. You can flip the board at any time with the flip button or the <kbd>F</kbd> key.</p></details>
+    <details class="faq"><summary>Can I analyse a position from the middle of a game?</summary><p>Yes. Step to the move you want and play on from there. The board judges every move you make, and the Engine tab shows the best lines for any position you reach.</p></details>
+    <details class="faq"><summary>Who can see my games?</summary><p>Your game is sent to the server so the engine can analyse it, and the finished review is held in the server's memory for a limited time. The recent reviews on this page are stored only in your own browser, and you can remove them whenever you like.</p></details>
+  </section>
+
+  <footer class="site">
+    <div><b>MoveLens</b>: a free chess game review tool. Analysis is done by <span id="engine-credit">Stockfish</span>, the open-source chess engine. Opening names come from the public-domain Lichess opening list. Piece sets are by Colin M. L. Burnett, Armando Hernandez Marroquin, Alexis Luengas and Maurizio Monge (<a href="/static/pieces/CREDITS.md">licences</a>). Backgrounds were created for this project.</div>
+    <div class="fine">MoveLens is an independent project and is not affiliated with Chess.com or Lichess. Labels are an approximation and may differ from other sites.
+      <div id="storage" style="margin-top:10px"></div></div>
+  </footer>
+</div>
+
+<!-- ================================================================= REVIEW -->
+<div id="review-view" class="rv hidden">
+  <div class="rv-left">
+    <div class="pbar" id="rv-top"></div>
+    <div class="board-wrap">
+      <div class="evalbar" id="evalbar"><div class="white" id="evalbar-white"></div><div class="val" id="evalbar-val"></div></div>
+      <div class="board" id="board" aria-label="Chess board"></div>
+    </div>
+    <div class="pbar" id="rv-bottom"></div>
+  </div>
+
+  <aside class="rv-side">
+    <div class="panel-head">
+      <div style="display:flex;align-items:center;gap:2px">
+        <button class="btn btn-ghost" id="rv-back" title="Back to the start page" aria-label="Back"><svg class="icon"><use href="#i-back"/></svg></button>
+        <h2><svg viewBox="0 0 32 32" aria-hidden="true"><rect width="32" height="32" rx="7" fill="#81b64c"/><path d="M0 0h16v16H0zM16 16h16v16H16z" fill="#ebecd0" opacity=".96"/><circle cx="20" cy="12" r="6" fill="none" stroke="#fff" stroke-width="2.6"/><path d="M24.5 16.5 29 21" stroke="#fff" stroke-width="2.6" stroke-linecap="round"/></svg>Game Review</h2>
+      </div>
+      <div class="tools">
+        <button class="btn btn-ghost" id="rv-flip" title="Flip board (F)" aria-label="Flip board"><svg class="icon"><use href="#i-flip"/></svg></button>
+        <button class="btn btn-ghost" id="rv-sound" title="Sound (S)" aria-label="Toggle sound"><svg class="icon"><use href="#i-vol"/></svg></button>
+        <button class="btn btn-ghost" id="rv-theme" title="Themes" aria-label="Themes"><svg class="icon"><use href="#i-palette"/></svg></button>
+      </div>
+    </div>
+    <div class="tabs" role="tablist">
+      <button role="tab" data-tab="review" aria-selected="true">Review</button>
+      <button role="tab" data-tab="summary" aria-selected="false">Summary</button>
+      <button role="tab" data-tab="engine" aria-selected="false">Engine</button>
+    </div>
+
+    <div class="tab-pane" id="tab-review">
+      <div class="coach" id="coach"></div>
+      <div class="actions">
+        <button class="btn" id="btn-explain" aria-pressed="false" title="Explain (E)"><svg><use href="#i-bulb"/></svg>Explain</button>
+        <button class="btn" id="btn-best" aria-pressed="false" title="Show the best move (B)"><svg><use href="#i-star"/></svg>Best</button>
+        <button class="btn" id="btn-retry" title="Retry this move (R)"><svg><use href="#i-retry"/></svg>Retry</button>
+        <button class="btn btn-primary" id="btn-next" title="Next move (→)"><svg><use href="#i-arrow"/></svg><span>Next</span></button>
+      </div>
+      <div class="explain hidden" id="explain"></div>
+      <div class="banner hidden" id="banner"></div>
+      <div class="moves" id="moves"></div>
+      <div class="graph-wrap"><svg class="graph" id="graph" viewBox="0 0 400 92" preserveAspectRatio="none" aria-label="Evaluation graph"></svg></div>
+      <div class="controls">
+        <button class="btn" id="c-first" title="Start (Home)" aria-label="Start"><svg><use href="#i-first"/></svg></button>
+        <button class="btn" id="c-prev" title="Previous (←)" aria-label="Previous move"><svg><use href="#i-prev"/></svg></button>
+        <button class="btn" id="c-play" title="Auto-play (Space)" aria-label="Auto-play"><svg><use href="#i-play"/></svg></button>
+        <button class="btn" id="c-next" title="Next (→)" aria-label="Next move"><svg><use href="#i-next"/></svg></button>
+        <button class="btn" id="c-last" title="End (End)" aria-label="End"><svg><use href="#i-last"/></svg></button>
+      </div>
+    </div>
+
+    <div class="tab-pane hidden" id="tab-summary"></div>
+
+    <div class="tab-pane hidden" id="tab-engine">
+      <label class="switch"><span>Show engine lines</span><input type="checkbox" id="sw-lines"></label>
+      <div class="elines" id="elines"></div>
+      <p class="note" id="elines-note" style="margin-top:10px">Turn this on to see Stockfish's three best continuations for the position on the board. Click a line to play its first move.</p>
+      <div class="sec-title">Explore</div>
+      <div class="btn-row">
+        <button class="btn" id="x-undo"><svg class="icon"><use href="#i-prev"/></svg>Undo move</button>
+        <button class="btn" id="x-engine"><svg class="icon"><use href="#i-bolt"/></svg>Play engine move</button>
+        <button class="btn" id="x-reset"><svg class="icon"><use href="#i-back"/></svg>Back to game</button>
+      </div>
+      <p class="note" style="margin-top:10px">Drag or click pieces on the board to play your own moves from any point in the game. Right-click and drag to draw arrows.</p>
+    </div>
+  </aside>
+</div>
+</main>
+
+<div class="pop hidden picker" id="theme-pop" role="dialog" aria-label="Themes"></div>
+
+<div class="modal hidden" id="keys-modal" role="dialog" aria-modal="true" aria-label="Keyboard shortcuts">
+  <div class="card"><h2>Keyboard shortcuts</h2><div class="keys" id="keys-modal-list"></div>
+    <div style="margin-top:18px;text-align:right"><button class="btn" id="keys-close">Close</button></div></div>
+</div>
+<div class="toast hidden" id="toast" role="status"></div>
+
+<script type="module" src="/static/js/main.js"></script>
+</body>
+</html>

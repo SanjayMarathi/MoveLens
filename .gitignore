@@ -1,0 +1,29 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+.pytest_cache/
+
+# Tests: launcher scripts for the stand-in engine are generated on each run
+tests/_fake_engine.sh
+tests/_fake_engine.bat
+
+# Training data (large) and archives
+ml/*.csv
+ml/*.pgn
+*.zst
+
+# Editor / OS
+.vscode/
+.idea/
+.DS_Store
+Thumbs.db
+
+# Node (only used by the tools/ scripts, which need no packages)
+node_modules/
+
+# Images are committed as base64 text (*.b64), because Hugging Face rejects binary files.
+# The real files stay on your computer; see app/assets.py.
+static/bg/*.jpg
+static/icon-*.png

@@ -1,0 +1,4 @@
+# Only needed to TRAIN the optional rating estimator (ml/), or to run the server with a trained ml/rating_model.joblib.
+# The Docker image installs these automatically when ml/rating_model.joblib exists.
+scikit-learn>=1.4
+joblib>=1.3

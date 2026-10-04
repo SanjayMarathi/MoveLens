@@ -1,0 +1,4 @@
+# Always store text files with Unix line endings, so a Windows checkout can never put CRLF into the Dockerfile.
+* text=auto eol=lf
+*.svg text eol=lf
+*.b64 text eol=lf

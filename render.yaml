@@ -1,0 +1,16 @@
+# Render Blueprint: New > Blueprint > pick this repo. Render builds the Dockerfile.
+services:
+  - type: web
+    name: movelens-chess-review
+    runtime: docker
+    plan: free
+    healthCheckPath: /api/health
+    envVars:
+      - key: MAX_QUALITY
+        value: fast          # the free plan has very little CPU; "fast" keeps reviews quick
+      - key: ENGINE_WORKERS
+        value: "1"
+      - key: ENGINE_HASH_MB  # the free plan has 512 MB of RAM in total
+        value: "16"
+      - key: STOCKFISH_PATH  # Debian's Stockfish uses much less memory than the newest build
+        value: /usr/games/stockfish

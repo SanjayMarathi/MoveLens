@@ -1,0 +1,16 @@
+{
+  "name": "MoveLens: Chess Game Review",
+  "short_name": "MoveLens",
+  "description": "Free chess game review: every move labelled, a board you can play on, and Chess.com / Lichess import.",
+  "id": "/",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "background_color": "#4b9be0",
+  "theme_color": "#4b9be0",
+  "icons": [
+    { "src": "/static/icon.svg", "sizes": "any", "type": "image/svg+xml", "purpose": "any" },
+    { "src": "/static/icon-192.png", "sizes": "192x192", "type": "image/png", "purpose": "any" },
+    { "src": "/static/icon-512.png", "sizes": "512x512", "type": "image/png", "purpose": "any" }
+  ]
+}
