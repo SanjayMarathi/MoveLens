@@ -94,7 +94,7 @@ You do not need to set any variables. When MoveLens starts it detects the 2-CPU 
 | Deepest analysis offered | **Deep** (a request for "Maximum" is quietly lowered to Deep) |
 | Engine threads | 2 for the review engine, 1 for the engine that answers your own moves |
 | Reviews allowed to wait | 6 (more get a polite "server is busy"), and each waiting person sees how many reviews are ahead of theirs |
-| Real speed (measured with a 2-CPU limit) | a 47-move game at **Deep in about 1.5 minutes**; shared free CPUs can be slower, so expect 1.5 to 3 minutes |
+| Real speed (measured on the live free Space) | a 47-move game (94 plies) at **Deep in 115 seconds**; other games scale with their length |
 
 (You *can* override them with Space variables: `MAX_QUALITY`, `MAX_QUEUED`, `ENGINE_THREADS`. Saving a variable restarts the Space.)
 

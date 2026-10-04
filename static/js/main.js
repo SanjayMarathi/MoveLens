@@ -35,6 +35,7 @@ function showLanding() {
   closeReview();
   $("landing").classList.remove("hidden");
   $("review-view").classList.add("hidden");
+  $("main").classList.remove("reviewing");
   $("new-btn").classList.add("hidden");
   history.replaceState(null, "", location.pathname + location.search);
   renderRecent();
@@ -43,6 +44,7 @@ function showLanding() {
 function showReview() {
   $("landing").classList.add("hidden");
   $("review-view").classList.remove("hidden");
+  $("main").classList.add("reviewing");
   $("new-btn").classList.remove("hidden");
   window.scrollTo(0, 0);
 }

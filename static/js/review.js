@@ -330,7 +330,6 @@ function render() {
   renderCoach();
   renderActions();
   renderExplain();
-  renderBanner();
   renderMoves();
   renderGraphCursor();
   renderLinesPanel();
@@ -414,8 +413,8 @@ function renderCoach() {
     text = `${S.retry.san} was ${/^[aeiou]/i.test(LABELS[S.retry.label].name) ? "an" : "a"} ${LABELS[S.retry.label].name.toLowerCase()}. Can you find a better move? Play it on the board. Stuck? Press Best.`;
   } else if (!m) {
     title = "Starting position";
-    const op = S.result.opening ? ` This game is a <b>${esc(S.result.opening.name)}</b> (${esc(S.result.opening.eco)}).` : "";
-    text = `Step through the game with the arrow keys or the buttons below, or drag a piece to try your own idea.${op}`;
+    text = "Use the arrow keys or the buttons below to step through the game, or drag a piece to try your own idea.";
+    if (S.result.opening) line = `<div class="line">Opening: ${esc(S.result.opening.name)} (${esc(S.result.opening.eco)})</div>`;
   } else if (m.pending) {
     title = `${moveTitle(m)}`;
     text = `<span class="spinner"></span>The engine is checking your move…`;
@@ -474,16 +473,6 @@ function renderExplain() {
     row("Evaluation", `${esc(before?.text ?? "–")} → ${esc(m.eval_after.text)}`) +
     row("Move accuracy", `${m.accuracy.toFixed(0)}%`) +
     (m.best_move && !NO_ARROW.has(m.label) ? row("Better was", `${figurine(m.best_move.san, m.color)}`) : "");
-}
-
-function renderBanner() {
-  const el = $("banner");
-  if (!exploring()) { el.classList.add("hidden"); return; }
-  el.classList.remove("hidden");
-  el.innerHTML = S.retry
-    ? `<span>${S.retry.solved ? "Solved! Nice find." : "Retry mode: find a better move"}</span><button class="btn" id="banner-btn">Skip</button>`
-    : `<span>You're exploring a side line from move ${S.ply ? Math.ceil(S.ply / 2) : 1}</span><button class="btn" id="banner-btn">Back to game</button>`;
-  $("banner-btn").onclick = backToGame;
 }
 
 function renderMoves() {
