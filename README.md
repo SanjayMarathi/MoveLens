@@ -23,7 +23,9 @@ short_description: Free chess game review with a playable analysis board
 ![Stockfish](https://img.shields.io/badge/Stockfish-19-4a7c3a)
 ![PWA](https://img.shields.io/badge/PWA-offline--first-5A0FC8?logo=pwa&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-90%20passing-3fb950)
+![Tests](https://img.shields.io/badge/tests-104%20passing-3fb950)
+
+**Live:** ![games reviewed](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.games&label=games%20reviewed&color=81b64c&cacheSeconds=600) ![moves analysed](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.moves&label=moves%20analysed&color=81b64c&cacheSeconds=600) ![users](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.users&label=users&color=5c8bb0&cacheSeconds=600) ![online now](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.online&label=online%20now&color=1baca6&cacheSeconds=600)
 
 <img src="docs/images/hero.svg" alt="MoveLens front page" width="860">
 
@@ -35,7 +37,9 @@ short_description: Free chess game review with a playable analysis board
 - **Lets you play on the board.** Drag or click any piece at any point of the game and get the engine's verdict on your move. **Retry** a mistake and try to find the better move. Switch on the **top three engine lines** for any position and click a line to play it.
 - **Imports games** by pasting a PGN, uploading a file, or typing a **Chess.com / Lichess username**. Type your username and the board opens from *your* side.
 - **Works offline and remembers everything.** Reviews, the side lines you explored, every engine answer, and even the app itself are kept in your browser (Service Worker + IndexedDB). A position you have seen is answered instantly with zero server calls.
-- **Looks good.** Responsive from phone to wide monitor, 6 scenes, 12 boards, 6 piece sets, move sounds, keyboard shortcuts, right-click arrows. The layout never jumps while you step through a game.
+- **Fits every screen.** The board is always the largest that fits, with both player bars and every control on screen: side by side on a laptop, a 4K monitor or a phone held sideways, stacked with the move buttons pinned to the bottom on a phone held upright. Drag the handle at the board's corner to make it smaller; double-click it to fit again. The layout never jumps while you step through a game.
+- **Classic look first, yours after.** It opens with the classic green board on a dark background; pick from 6 scenes, 12 boards and 6 piece sets, with move sounds, keyboard shortcuts and right-click arrows.
+- **Shows live public numbers.** The front page counts games reviewed, moves analysed, users and who is online right now. Nothing personal is collected: a browser is counted once by a random id it makes itself, and the totals survive restarts in a private Hugging Face dataset.
 
 <table>
 <tr>
@@ -134,6 +138,9 @@ The same `Dockerfile` runs anywhere. Step-by-step guides: **[Hugging Face Spaces
 | `ENGINE_HASH_MB` | 128 | Memory per engine |
 | `MAX_QUALITY` | `deep` on 2 CPUs, else `max` | Highest depth offered |
 | `MAX_QUEUED` | 6 on 2 CPUs, else 20 | Reviews allowed to wait |
+| `HF_TOKEN` | none | Token that can write the stats dataset; keeps the public totals across restarts ([how](docs/DEPLOY.md#6b-keep-the-public-numbers-across-restarts-one-secret-3-minutes)) |
+| `STATS_REPO` | `<space owner>/movelens-stats` | Private dataset that keeps the totals |
+| `STATS_FILE` | `/data/…` if mounted, else temp | Local file for the totals |
 
 ## API
 
@@ -147,16 +154,18 @@ Interactive docs at `/docs` (Swagger UI).
 | POST | `/api/explore` | judge a move you played, with the same labels as a review |
 | POST | `/api/analyse` | the engine's best lines for a position |
 | GET | `/api/import/{chesscom\|lichess}?user=` | a player's 20 latest games |
-| GET | `/api/health` | engine, depth limit, CPUs, opening book |
+| GET | `/api/stats` | games reviewed, moves analysed, users, online now |
+| POST | `/api/presence` | heartbeat of an open tab (random ids only); answers with the numbers |
+| GET | `/api/health` | engine, depth limit, CPUs, opening book, where the totals are kept |
 
 ## Project structure
 
 ```
 app/            FastAPI server, chess rules engine, PGN parser, UCI client, classifier, review pipeline,
-                live-board logic, Chess.com/Lichess importer, host detection
+                live-board logic, Chess.com/Lichess importer, host detection, public usage numbers
 static/         index.html, css/, js/ (ES modules), sw.js (service worker), pieces/ (SVG sets), bg/ (scenes)
 data/           3,800 named openings (Lichess, public domain)
-tests/          pytest suite (82 tests), stand-in UCI engine, service-worker tests (Node)
+tests/          pytest suite (96 tests), stand-in UCI engine, service-worker tests (Node)
 ml/             optional rating-estimator dataset builder and trainer
 tools/          scripts that draw the scene backgrounds and app icons
 docs/           HOW_IT_WORKS.md (guided tour), DEPLOY.md
@@ -169,6 +178,7 @@ Dockerfile      Python image + Stockfish 19, non-root
 - **Rigid review layout.** The side panel is exactly as tall as the board column and every block has a fixed size, so no coach comment, tab or opened panel can move the board or the buttons.
 - **Offline-first.** The service worker serves the saved app when the server is offline *or slow* (a free host that is waking up), and never lets a host's "starting" page replace the cached app.
 - **Hugging Face rejects binary files in git**, so images are committed as base64 text and decoded by the server (`app/assets.py`); screenshots in this README are SVG wrappers for the same reason.
+- **Counters that can't go backwards.** The public totals are kept as *saved base + this server's additions*; each save to the Hub reads the Hub first and adds to it, and nothing is written while it can't be read. Two copies of the app running during a deploy never overwrite each other, and the container stops gracefully (`exec uvicorn`) so the last additions are saved.
 - **Honest fallbacks.** If the newest Stockfish cannot run on the host, the server starts the older Debian build instead; if IndexedDB is blocked, the app falls back to memory.
 
 ## Roadmap

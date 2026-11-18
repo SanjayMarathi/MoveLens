@@ -18,6 +18,12 @@ it never waits behind a running review:
     POST /api/analyse        {"fen": ..., "count": 3}              -> the engine's best lines
     GET  /api/import/{site}?user=name                              -> a player's recent games (chesscom | lichess)
 
+The public numbers on the front page (see stats.py):
+
+    POST /api/presence       {"visitor": id, "tab": id, "first": b} -> heartbeat of an open tab; answers with the numbers
+    POST /api/presence/leave {"tab": id}                           -> the tab was closed or hidden
+    GET  /api/stats                                                -> games reviewed, moves analysed, users, online now
+
 Environment variables:
     STOCKFISH_PATH      path to the engine binary (default: found on PATH, or /usr/games/stockfish)
     STOCKFISH_FALLBACK  a second engine to try if the first can't start (e.g. the CPU lacks AVX2)
@@ -26,9 +32,11 @@ Environment variables:
     ENGINE_HASH_MB      memory per Stockfish for its transposition table (default 128)
     MAX_QUALITY         highest analysis quality allowed: fast | standard | deep | max (default: deep on a 2-CPU host, else max)
     MAX_QUEUED          reviews allowed to wait at once (default: 6 on a 2-CPU host, else 20)
+    STATS_FILE, STATS_REPO, HF_TOKEN   where the usage totals are kept (see stats.py)
 """
 from __future__ import annotations
 
+import asyncio
 import hashlib
 import json
 import os
@@ -38,11 +46,12 @@ import time
 import uuid
 from collections import OrderedDict
 from concurrent.futures import ThreadPoolExecutor
+from contextlib import asynccontextmanager
 from concurrent.futures import TimeoutError as FutureTimeout
 from pathlib import Path
 from typing import Callable, List, Literal, Optional
 
-from fastapi import FastAPI, HTTPException
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.responses import FileResponse, Response
 from pydantic import BaseModel, Field
 
@@ -53,6 +62,7 @@ from .importer import ImportProblem, recent_games
 from .openings import OpeningBook, position_key
 from .pgn import parse_pgn
 from .review import LIVE_QUALITY, QUALITY, review_game
+from .stats import ID_RE, Keeper, Stats, default_file, hub_from_env
 from .sysinfo import default_limits, effective_cpus
 from .uci import EngineError, EngineLine, UciEngine
 
@@ -75,10 +85,21 @@ MAX_JOBS_KEPT = 300
 MAX_PGN_CHARS = 100_000
 LIVE_TIMEOUT = 60
 
+usage = Stats()
+keeper = Keeper(usage, default_file(), hub_from_env())
+
+
+@asynccontextmanager
+async def lifespan(_app: FastAPI):
+    yield
+    await asyncio.to_thread(keeper.flush)       # save the latest totals before the server stops
+
+
 app = FastAPI(
     title="MoveLens API",
     description="Paste a game, get every move classified (Brilliant ... Blunder) with Stockfish, then play on the board.",
-    version="2.0.0",
+    version="2.1.0",
+    lifespan=lifespan,
 )
 
 book = OpeningBook()
@@ -118,6 +139,7 @@ def get_engine(live: bool = False) -> UciEngine:
 
 
 def _startup() -> None:
+    keeper.start()                                # the usage totals saved before the last restart
     book.load()                                   # takes a few seconds; don't block the server starting
     try:
         start_engine(16).close()                  # learn the engine's name, and fail early in the logs if it can't run
@@ -179,6 +201,7 @@ def run_job(job: Job) -> None:
                 if attempt == 1:
                     raise
         job.status = "done"
+        usage.record_review(len(job.result["moves"]))
     except EngineError as e:
         job.status, job.error = "error", f"Engine problem: {e}"
     except Exception as e:  # noqa: BLE001 - report anything to the user rather than hang
@@ -323,6 +346,7 @@ def health():
         "max_quality": MAX_QUALITY,
         "max_queued": MAX_QUEUED,
         "cpus": CPUS,
+        "stats_storage": keeper.describe(),
     }
 
 
@@ -372,9 +396,11 @@ def legal(req: FenRequest):
 @app.post("/api/explore", summary="Judge a move you played on the board")
 def explore(req: ExploreRequest):
     book.wait()
-    return run_live(req.quality, lambda analyse: explore_move(
+    answer = run_live(req.quality, lambda analyse: explore_move(
         req.fen, req.uci, analyse, book=book,
         previous_label=req.previous_label, recapture_square=req.recapture_square))
+    usage.record_move()
+    return answer
 
 
 @app.post("/api/analyse", summary="The engine's best lines for a position")
@@ -388,3 +414,39 @@ def import_games(site: str, user: str):
         return {"site": site, "user": user.strip(), "games": recent_games(site, user.strip())}
     except ImportProblem as e:
         raise HTTPException(e.status, str(e))
+
+
+# --------------------------------------------------------------------------- public numbers
+class PresenceRequest(BaseModel):
+    visitor: str = Field(..., pattern=ID_RE.pattern, description="Random id this browser made for itself")
+    tab: str = Field(..., pattern=ID_RE.pattern, description="Random id of this open tab")
+    first: bool = Field(False, description="True until the server has counted this browser once")
+
+
+class LeaveRequest(BaseModel):
+    tab: str = Field(..., pattern=ID_RE.pattern)
+
+
+def client_ip(request: Request) -> str:
+    forwarded = request.headers.get("x-forwarded-for", "")          # behind the host's proxy
+    return forwarded.split(",")[0].strip() or (request.client.host if request.client else "")
+
+
+NO_STORE = {"Cache-Control": "no-store"}
+
+
+@app.post("/api/presence", summary="Heartbeat of an open tab; answers with the public numbers")
+def presence(req: PresenceRequest, request: Request):
+    counted = usage.heartbeat(req.visitor, req.tab, first=req.first, ip=client_ip(request))
+    return Response(json.dumps({"counted": counted, "stats": usage.snapshot()}), media_type="application/json", headers=NO_STORE)
+
+
+@app.post("/api/presence/leave", status_code=204, summary="A tab was closed or hidden")
+def presence_leave(req: LeaveRequest):
+    usage.leave(req.tab)
+    return Response(status_code=204)
+
+
+@app.get("/api/stats", summary="Games reviewed, moves analysed, users, and who is online now")
+def public_stats():
+    return Response(json.dumps(usage.snapshot()), media_type="application/json", headers=NO_STORE)

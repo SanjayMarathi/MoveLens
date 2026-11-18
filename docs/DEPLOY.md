@@ -102,6 +102,27 @@ You do not need to set any variables. When MoveLens starts it detects the 2-CPU 
 
 *(Optional, later: if you ever want it faster, "CPU Upgrade" has 8 vCPU for $0.03 per hour. Set `ENGINE_WORKERS=2` and `MAX_QUALITY=max` and give it a sleep time so it stops billing when idle.)*
 
+## 6b. Keep the public numbers across restarts (one secret, 3 minutes)
+
+The front page shows live totals: **games reviewed, moves analysed, users, and who is online now**. A free Space
+loses its disk every time it restarts or you push an update, so on its own the totals would start again from zero.
+Give the Space somewhere to keep them: a small **private dataset** on your account.
+
+1. Create the dataset: <https://huggingface.co/new-dataset> → name **`movelens-stats`**, visibility **Private** → *Create dataset*.
+2. Create a token that can write **only** to that dataset: <https://huggingface.co/settings/tokens> → *Create new token* →
+   **Fine-grained** → name it `movelens-stats`. Under *Repositories permissions* search for `YOUR_USERNAME/movelens-stats`
+   and tick **Write access to contents/settings of selected repos**. Leave everything else unticked → *Create token* → copy it.
+3. Open your Space → **Settings** → *Variables and secrets* → **New secret**: name **`HF_TOKEN`**, value: the token. Save.
+   The Space restarts.
+
+That's all: inside a Space the app uses `YOUR_USERNAME/movelens-stats` automatically (set a `STATS_REPO` variable for a
+different name). It reads the totals when it starts, saves them every ten minutes when they change, and once more when the
+Space stops. Check it at `https://YOUR_USERNAME-movelens.hf.space/api/health`: `"stats_storage"` should say `"hub_ok": true`.
+After the first review, the dataset contains a `stats.json` with the totals.
+
+Without the secret everything still works; the totals just restart from zero after each restart. What is stored is three
+numbers and a start date: no game, name or address. A browser is counted as a user once, by a random id it makes itself.
+
 ## 7. Watch it build
 
 The Space page shows **Building**. Click **Logs** to follow it. The first build takes about **5 to 8 minutes**: it installs Python packages and downloads Stockfish 19 (80 MB). Later builds are faster because layers are cached.
@@ -115,7 +136,8 @@ When the badge turns **Running**, the app is live at:
 
 Open the direct link and tick off:
 
-- [ ] The front page loads with the sky background and the animated demo board.
+- [ ] The front page loads with the classic look (green board on a dark background), the live numbers and the animated demo board.
+- [ ] `https://YOUR_USERNAME-movelens.hf.space/api/stats` shows the totals, and `"online"` is at least 1 while the page is open.
 - [ ] `https://YOUR_USERNAME-movelens.hf.space/api/health` shows `"engine_name":"Stockfish 19"` and `"engine_found":true`.
 - [ ] **Try a famous game** opens instantly and you can play a move on the board.
 - [ ] Paste a short game (or use the Chess.com tab with your username) and press **Review game**. The progress bar should move. At **Deep** a 40-move game takes roughly 1.5 to 3 minutes on the free server.
@@ -180,7 +202,7 @@ PRO does **not** include free upgraded CPU. Faster hardware is billed per hour o
 
 * **CPU basic** gives 2 vCPU and 16 GB RAM. Spaces on it **sleep after 48 hours without visitors** and wake on the next visit, which takes around a minute. MoveLens copes with that: a returning visitor's browser opens the saved app within about 3 seconds, shows a "server is waking up" note, and the sample game, saved reviews and positions already seen work meanwhile. A first-time visitor sees Hugging Face's own waking-up page for that minute.
 * Outbound requests are allowed on ports 80, 443 and 8080 only. The Chess.com and Lichess import uses 443, so it works.
-* The Space's disk is temporary (50 GB, not persistent). That is fine: nothing important is stored there. The server keeps finished reviews in memory for a while; the visitor's browser keeps its own copy.
+* The Space's disk is temporary (50 GB, not persistent). Nothing important is stored there: the server keeps finished reviews in memory for a while, the visitor's browser keeps its own copy, and the public totals go to the private dataset from step 6b.
 * The Space is open to anyone with the link, so anyone can run reviews. On the free 2-CPU hardware the server lets 6 reviews wait at once and politely says "busy" after that.
 * The server must be able to reach `api.chess.com` and `lichess.org` for the username import. Hugging Face allows outbound requests.
 
@@ -197,6 +219,7 @@ PRO does **not** include free upgraded CPU. Faster hardware is billed per hour o
 | Reviews feel slow | Pick **Standard** (about 30 seconds) or **Fast** in the depth menu. Or set the Space variable `MAX_QUALITY=standard` so visitors get the quicker depth by default. |
 | "The server is waking up" note | Normal after a quiet spell on free hardware. It disappears by itself within about a minute. |
 | "The server is busy" | Six reviews are already waiting. Try again in a few minutes. |
+| The numbers on the front page went back to zero | The Space restarted without the `HF_TOKEN` secret from step 6b, or the token can't write to the dataset. Open `/api/health` and the Space logs (lines starting `[movelens]`). |
 | "That review isn't available any more" | The Space restarted and forgot the server-side copy. Reviews saved in the visitor's browser still open from the *Recent reviews* list. |
 | You pushed a token by accident | Revoke it at <https://huggingface.co/settings/tokens> and create a new one. |
 

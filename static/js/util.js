@@ -26,10 +26,11 @@ export const BAD_LABELS = new Set(["inaccuracy", "mistake", "miss", "blunder"]);
 export const KEY_LABELS = new Set(["brilliant", "great", "mistake", "miss", "blunder"]);
 export const NO_ARROW = new Set(["best", "brilliant", "great", "book", "forced"]);
 
+// The first of each is the default look: the classic green board on a dark background.
 export const BOARDS = {
-  sky:        { name: "Sky",        light: "#f2f5f7", dark: "#b7d0e3" },
   green:      { name: "Green",      light: "#ebecd0", dark: "#739552" },
   brown:      { name: "Brown",      light: "#f0d9b5", dark: "#b58863" },
+  sky:        { name: "Sky",        light: "#f2f5f7", dark: "#b7d0e3" },
   walnut:     { name: "Walnut",     light: "#dcbd94", dark: "#8a5a35" },
   blue:       { name: "Blue",       light: "#dee3e6", dark: "#8ca2ad" },
   icy:        { name: "Icy Sea",    light: "#e6eef3", dark: "#6f9fc0" },
@@ -41,12 +42,12 @@ export const BOARDS = {
   tournament: { name: "Tournament", light: "#f7f7f5", dark: "#3f7a4e" },
 };
 export const SCENES = {
+  slate:  { name: "Slate",  thumb: "linear-gradient(#302e2b,#262421)" },
+  paper:  { name: "Paper",  thumb: "linear-gradient(#ffffff,#ebeae6)" },
   sky:    { name: "Sky",    thumb: "url(/static/bg/sky.jpg)" },
   meadow: { name: "Meadow", thumb: "url(/static/bg/meadow.jpg)" },
   dusk:   { name: "Dusk",   thumb: "url(/static/bg/dusk.jpg)" },
   night:  { name: "Night",  thumb: "url(/static/bg/night.jpg)" },
-  slate:  { name: "Slate",  thumb: "linear-gradient(#302e2b,#262421)" },
-  paper:  { name: "Paper",  thumb: "linear-gradient(#ffffff,#ebeae6)" },
 };
 export const PIECE_SETS = { cburnett: "Classic", merida: "Merida", chessnut: "Chessnut", fantasy: "Fantasy", celtic: "Celtic", spatial: "Spatial" };
 export const PIECE_KEYS = ["wK", "wQ", "wR", "wB", "wN", "wP", "bK", "bQ", "bR", "bB", "bN", "bP"];

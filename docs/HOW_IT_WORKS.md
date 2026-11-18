@@ -138,6 +138,8 @@ Positions where the game is over (checkmate, stalemate) are scored directly with
 
 Each worker thread owns **its own Stockfish process** (`threading.local`), because a single engine can only think about one position at a time. `ENGINE_WORKERS` controls how many reviews run in parallel. Extra requests wait in the queue, and there's a cap (`MAX_QUEUED`) so the server can't be overloaded.
 
+**The public numbers** (`app/stats.py`). The front page shows games reviewed, moves analysed, users and who is online now. A finished job adds one game and its moves; each move judged on the live board adds one more. Every open, visible tab sends `POST /api/presence` every 30 seconds with two random ids (one for the browser, one for the tab): a tab silent for 75 seconds no longer counts as online, and a browser asks to be counted as a user only until the server says it was. The totals are kept as `base + pending`: `base` is the last total known to be saved, `pending` is what this server added since. Saving to the private Hugging Face dataset reads the Hub's copy first and writes *its* total plus `pending`, so two copies of the app running at once during a deploy never overwrite each other, and nothing is written while the Hub can't be read.
+
 **Exercise:** jobs live in memory, so they disappear on restart. Store finished results in SQLite (`sqlite3` is built into Python) so review links keep working after a restart.
 
 ---
@@ -148,12 +150,14 @@ No framework and no build step: plain HTML, one stylesheet, and a few ES modules
 
 ```
 static/index.html      the markup: front page sections + the review screen
-static/css/app.css     tokens, scenes (sky, dusk, night...), layout
+static/css/app.css     tokens, scenes (slate is the default; sky, dusk, night...), layout that fits any screen
 static/js/main.js      wires everything up; starts reviews; opens a review from the URL
 static/js/landing.js   the form, importing games by username, recent reviews, the demo board
 static/js/review.js    the review screen: state, coach, move list, summary, engine lines
 static/js/board.js     the board itself: drawing, drag and drop, promotion picker, arrows
-static/js/prefs.js     saved preferences and the theme picker
+static/js/prefs.js     saved preferences and the theme picker (only settings you chose are saved)
+static/js/presence.js  the live numbers on the front page, and this tab's heartbeat
+static/js/resize.js    the handle that resizes the board
 static/js/api.js       fetch wrappers for the server's JSON API
 ```
 
@@ -162,7 +166,7 @@ Things worth reading:
 - **`board.js` knows nothing about reviews.** You hand it a FEN and it draws 64 squares. When you move a piece it calls `onMove` with a legal-move entry. Legal moves come from the server (`POST /api/legal`) once per position, so the browser needs no chess rules.
 - **`review.js` keeps its whole state in one object `S`:** `ply` (which move of the real game is shown), `line` (moves you played yourself after that ply), and `retry` (set while you look for a better move than a mistake). Every `render()` simply redraws the board, coach, move list and graph from `S`, which is why stepping back and forth never gets out of sync.
 - **Your own moves** are applied instantly (the legal-move entry already contains the new FEN), then judged by `POST /api/explore`, which uses the same `judge_move()` as the full review. A pending move shows a spinner until the label arrives.
-- **Board size** is computed in CSS from both the width and the height of the window (`--bs` in `app.css`), so the board and both player bars always fit the screen.
+- **Board size** is computed in CSS from both the width and the height of the window (`--fit` in `app.css`), so the board, both player bars and the panel always fit the screen: side by side on wide screens and on phones held sideways, stacked with the move buttons pinned to the bottom when held upright. The handle at the board's corner sets `--board-scale` (a share of `--fit`, saved per browser), so a chosen size suits every screen.
 - **Scenes** are JPEG backgrounds in `static/bg/`, drawn by `tools/make_backgrounds.js` (gradients, noise-based clouds, stars, hills rendered to JPEG through headless Edge or Chrome).
 
 **Exercise:** add a "Show only mistakes" filter to the move list, or a button that replays every mistake of the game as a Retry puzzle, one after another.

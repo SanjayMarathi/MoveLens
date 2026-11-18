@@ -6,6 +6,8 @@ import { saveReview, loadReview, loadSession, migrateLegacy } from "./history.js
 import * as store from "./store.js";
 import { initReview, openReview, closeReview, isOpen } from "./review.js";
 import { initLanding, setBusy, setProgress, showError, renderRecent, applyServerLimits } from "./landing.js";
+import { startPresence, beat } from "./presence.js";
+import { initResize } from "./resize.js";
 
 // ------------------------------------------------------------------ themes
 mountThemePicker($("theme-pop"));
@@ -20,13 +22,21 @@ $("theme-btn").onclick = (e) => { e.stopPropagation(); setPopover($("theme-pop")
 document.addEventListener("click", (e) => { if (!e.target.closest("#theme-pop") && !e.target.closest("#theme-btn")) setPopover(false); });
 $("sound-btn").onclick = () => setPref("sound", !prefs.sound);
 
+// the section links: in the top bar on wide screens, behind the menu button on smaller ones
+function setMenu(open) {
+  $("nav-links").classList.toggle("open", open);
+  $("menu-btn").setAttribute("aria-expanded", open);
+}
+$("menu-btn").onclick = (e) => { e.stopPropagation(); setMenu(!$("nav-links").classList.contains("open")); };
+document.addEventListener("click", (e) => { if (!e.target.closest("#menu-btn")) setMenu(false); });
+
 const keysModal = $("keys-modal");
 const setKeys = (open) => keysModal.classList.toggle("hidden", !open);
 $("keys-btn").onclick = () => setKeys(true);
 $("keys-close").onclick = () => setKeys(false);
 keysModal.onclick = (e) => { if (e.target === keysModal) setKeys(false); };
 document.addEventListener("keydown", (e) => {
-  if (e.key === "Escape") { setPopover(false); setKeys(false); }
+  if (e.key === "Escape") { setPopover(false); setKeys(false); setMenu(false); }
   if (e.key === "?" && !/^(INPUT|TEXTAREA|SELECT)$/.test(e.target.tagName)) setKeys(true);
 });
 
@@ -40,6 +50,7 @@ function showLanding() {
   $("new-btn").classList.add("hidden");
   history.replaceState(null, "", location.pathname + location.search);
   renderRecent();
+  beat();                                              // fresh numbers: your own review is in them now
   window.scrollTo(0, 0);
 }
 function showReview() {
@@ -108,6 +119,7 @@ async function openHistory(id) {
 }
 
 initReview({ onBack: showLanding });
+initResize();
 initLanding({ onReview: startReview, onSample: () => openSample(), onOpenHistory: openHistory });
 
 // ------------------------------------------------------------------ server facts, and "the free host is waking up"
@@ -122,11 +134,13 @@ async function watchServer() {
       if (h.engine_name) $("engine-credit").textContent = h.engine_name;
       if (h.max_quality) applyServerLimits(h.max_quality);
       clearTimeout(showWake); wake.classList.add("hidden");
+      beat();                                          // the server is up: show the live numbers straight away
       return;
     } catch (e) { /* asleep or starting: try again */ } finally { clearTimeout(timer); }
     await sleep(3000);
   }
 }
+startPresence();
 watchServer();
 
 // ------------------------------------------------------------------ open a review from the address (#r=<id>&ply=<n>)

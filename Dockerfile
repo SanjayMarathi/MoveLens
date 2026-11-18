@@ -43,4 +43,5 @@ RUN useradd -m appuser
 USER appuser
 
 EXPOSE 7860
-CMD ["sh", "-c", "uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]
+# exec: uvicorn replaces the shell, so it receives the stop signal and saves the usage totals before exiting
+CMD ["sh", "-c", "exec uvicorn app.main:app --host 0.0.0.0 --port ${PORT}"]

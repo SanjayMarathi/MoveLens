@@ -2,21 +2,44 @@
 import { $, $$, BOARDS, SCENES, PIECE_SETS, PIECE_KEYS, pieceUrl, esc } from "./util.js";
 import { setSoundEnabled } from "./sound.js";
 
-const KEY = "movelens.prefs.v2";
-export const DEFAULTS = { scene: "sky", board: "sky", pieces: "cburnett", view: "auto", me: "", sound: true, depth: "deep" };
+// Only the settings you changed yourself are saved, so everything else follows the defaults, even when they change.
+const KEY = "movelens.prefs.v3";
+const OLD_KEY = "movelens.prefs.v2";         // older versions saved every setting, chosen or not
+export const DEFAULTS = { scene: "slate", board: "green", pieces: "cburnett", view: "auto", me: "", sound: true, depth: "deep", boardScale: 1 };
+const OLD_DEFAULTS = { scene: "sky", board: "sky", pieces: "cburnett", view: "auto", me: "", sound: true, depth: "deep" };
+export const MIN_BOARD_SCALE = 0.3;
+
+function readChosen() {
+  try {
+    const saved = localStorage.getItem(KEY);
+    if (saved) return JSON.parse(saved) || {};
+    const old = JSON.parse(localStorage.getItem(OLD_KEY) || "null");
+    if (!old) return {};
+    // Settings that differ from the old defaults were really chosen; the rest now follow the new defaults
+    // (so the classic chess look replaces the old sky look for everyone who never picked one).
+    const chosen = {};
+    for (const [k, v] of Object.entries(old)) if (k in OLD_DEFAULTS && v !== OLD_DEFAULTS[k]) chosen[k] = v;
+    localStorage.setItem(KEY, JSON.stringify(chosen));
+    localStorage.removeItem(OLD_KEY);
+    return chosen;
+  } catch (e) { return {}; }                 // private mode, or a broken saved value
+}
+
+const chosen = readChosen();
 
 function load() {
-  let saved = {};
-  try { saved = JSON.parse(localStorage.getItem(KEY) || "{}"); } catch (e) { /* private mode */ }
-  const p = { ...DEFAULTS, ...saved };
+  const p = { ...DEFAULTS, ...chosen };
   // A link can carry a look: /?scene=night&board=green&pieces=merida&view=black&me=name (applied, not saved)
   const q = new URLSearchParams(location.search);
-  for (const k of Object.keys(DEFAULTS)) if (q.has(k)) p[k] = k === "sound" ? q.get(k) !== "0" : q.get(k);
+  for (const k of Object.keys(DEFAULTS)) if (q.has(k) && k !== "boardScale") p[k] = k === "sound" ? q.get(k) !== "0" : q.get(k);
   if (!SCENES[p.scene]) p.scene = DEFAULTS.scene;
   if (!BOARDS[p.board]) p.board = DEFAULTS.board;
   if (!PIECE_SETS[p.pieces]) p.pieces = DEFAULTS.pieces;
   if (!["auto", "white", "black"].includes(p.view)) p.view = "auto";
   if (!["fast", "standard", "deep", "max"].includes(p.depth)) p.depth = DEFAULTS.depth;
+  if (typeof p.me !== "string") p.me = "";
+  p.sound = p.sound !== false;
+  p.boardScale = Number.isFinite(+p.boardScale) ? Math.min(1, Math.max(MIN_BOARD_SCALE, +p.boardScale)) : 1;
   return p;
 }
 
@@ -24,7 +47,8 @@ export const prefs = load();
 
 export function setPref(key, value) {
   prefs[key] = value;
-  try { localStorage.setItem(KEY, JSON.stringify(prefs)); } catch (e) { /* ignore */ }
+  chosen[key] = value;
+  try { localStorage.setItem(KEY, JSON.stringify(chosen)); } catch (e) { /* ignore */ }
   applyPrefs();
   document.dispatchEvent(new CustomEvent("prefs", { detail: { key } }));
 }
@@ -35,6 +59,9 @@ export function applyPrefs() {
   document.body.dataset.scene = prefs.scene;
   root.style.setProperty("--light", b.light);
   root.style.setProperty("--dark", b.dark);
+  root.style.setProperty("--board-scale", prefs.boardScale);
+  const bg = getComputedStyle(document.body).getPropertyValue("--bg-solid").trim();          // the browser's bar matches the scene
+  if (bg) document.querySelector('meta[name="theme-color"]')?.setAttribute("content", bg);
   $("piece-css").textContent = PIECE_KEYS.map((k) => `.p-${k}{background-image:url(${pieceUrl(prefs.pieces, k)})}`).join("\n");
   setSoundEnabled(prefs.sound);
   const icon = prefs.sound ? "#i-vol" : "#i-mute";

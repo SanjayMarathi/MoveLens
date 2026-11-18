@@ -5,7 +5,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>MoveLens · Free Chess Game Review</title>
 <meta name="description" content="Paste a game or import it from Chess.com or Lichess. Stockfish labels every move from Brilliant to Blunder, shows the better move, and lets you play on the board to test your ideas.">
-<meta name="theme-color" content="#4b9be0">
+<meta name="theme-color" content="#262421">
 <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='7' fill='%2381b64c'/%3E%3Cpath d='M0 0h16v16H0zM16 16h16v16H16z' fill='%23ebecd0'/%3E%3Ccircle cx='20' cy='12' r='6' fill='none' stroke='%23fff' stroke-width='2.6'/%3E%3Cpath d='M24.5 16.5 29 21' stroke='%23fff' stroke-width='2.6' stroke-linecap='round'/%3E%3C/svg%3E">
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
@@ -14,7 +14,7 @@
 <link rel="stylesheet" href="/static/css/app.css">
 <style id="piece-css"></style>
 </head>
-<body data-scene="sky">
+<body data-scene="slate">
 
 <!-- icon sprite -->
 <svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
@@ -48,6 +48,7 @@
   <symbol id="i-history" viewBox="0 0 24 24"><path d="M13 3a9 9 0 0 0-9 9H1l3.89 3.89.07.14L9 12H6c0-3.87 3.13-7 7-7s7 3.13 7 7-3.13 7-7 7c-1.93 0-3.68-.79-4.94-2.06l-1.42 1.42A8.9 8.9 0 0 0 13 21a9 9 0 0 0 0-18zm-1 5v5l4.28 2.54.72-1.21-3.5-2.08V8z"/></symbol>
   <symbol id="i-grid" viewBox="0 0 24 24"><path d="M3 3h8v8H3zm10 0h8v8h-8zM3 13h8v8H3zm10 0h8v8h-8z"/></symbol>
   <symbol id="i-flag" viewBox="0 0 24 24"><path d="M14.4 6 14 4H5v17h2v-7h5.6l.4 2h7V6z"/></symbol>
+  <symbol id="i-menu" viewBox="0 0 24 24"><path d="M3 18h18v-2H3zm0-5h18v-2H3zm0-7v2h18V6z"/></symbol>
   <symbol id="i-info" viewBox="0 0 24 24"><path d="M11 7h2v2h-2zm0 4h2v6h-2zm1-9C6.48 2 2 6.48 2 12s4.48 10 10 10 10-4.48 10-10S17.52 2 12 2zm0 18c-4.41 0-8-3.59-8-8s3.59-8 8-8 8 3.59 8 8-3.59 8-8 8z"/></symbol>
 </defs></svg>
 
@@ -66,6 +67,7 @@
     <button class="btn btn-ghost" id="theme-btn" aria-haspopup="dialog" aria-expanded="false" title="Themes"><svg class="icon"><use href="#i-palette"/></svg><span class="lbl">Themes</span></button>
     <button class="btn btn-ghost" id="keys-btn" title="Keyboard shortcuts (?)" aria-label="Keyboard shortcuts"><svg class="icon"><use href="#i-keyboard"/></svg></button>
     <button class="btn btn-primary hidden" id="new-btn" style="padding:8px 14px;box-shadow:0 3px 0 var(--accent-shadow)"><svg class="icon"><use href="#i-plus"/></svg><span class="lbl">New review</span></button>
+    <button class="btn btn-ghost" id="menu-btn" aria-controls="nav-links" aria-expanded="false" title="Sections" aria-label="Sections"><svg class="icon"><use href="#i-menu"/></svg></button>
   </div>
 </header>
 
@@ -83,6 +85,13 @@
         <li><span class="tick"><svg><use href="#i-check"/></svg></span>Retry your mistakes</li>
         <li><span class="tick"><svg><use href="#i-check"/></svg></span>No sign-up</li>
       </ul>
+      <section class="stats" id="stats" aria-label="MoveLens in numbers">
+        <div class="stat"><b data-stat="games">–</b><span>Games reviewed</span></div>
+        <div class="stat"><b data-stat="moves">–</b><span>Moves analysed</span></div>
+        <div class="stat"><b data-stat="users">–</b><span>Users</span></div>
+        <div class="stat live"><b data-stat="online">–</b><span><i class="dot" aria-hidden="true"></i>Online now</span></div>
+        <p class="since" id="stats-since">Live numbers from everyone using MoveLens.</p>
+      </section>
       <div class="demo" aria-label="Live demo of a review">
         <div class="board-box"><div class="board static" id="demo-board" style="--bs:216px"></div></div>
         <div class="demo-note" id="demo-note" aria-live="polite"></div>
@@ -240,6 +249,7 @@
     <details class="faq"><summary>How is accuracy calculated?</summary><p>Each move gets a score from how much winning chance it lost against the best move. The game score blends a weighted average (sharp moments count more) with a harmonic mean (which punishes any very bad move). It is the same published formula Lichess uses.</p></details>
     <details class="faq"><summary>Can I view the board from Black's side?</summary><p>Yes. Choose <b>Black</b> under "View the board from", or type your username and leave it on Auto: MoveLens finds which side you played. You can flip the board at any time with the flip button or the <kbd>F</kbd> key.</p></details>
     <details class="faq"><summary>Can I analyse a position from the middle of a game?</summary><p>Yes. Step to the move you want and play on from there. The board judges every move you make, and the Engine tab shows the best lines for any position you reach.</p></details>
+    <details class="faq"><summary>What do the numbers at the top count?</summary><p>They are live totals for everyone using MoveLens: games reviewed, moves the engine has judged (every move of a reviewed game, and each move you play on the board), the number of different browsers that have opened MoveLens, and how many people have it open right now. Nothing about you is collected for them: your browser only sends a random id it made itself, so it is counted once.</p></details>
     <details class="faq"><summary>Who can see my games?</summary><p>Your game is sent to the server so the engine can analyse it, and the finished review is held in the server's memory for a limited time. The recent reviews on this page are stored only in your own browser, and you can remove them whenever you like.</p></details>
   </section>
 
@@ -252,11 +262,14 @@
 
 <!-- ================================================================= REVIEW -->
 <div id="review-view" class="rv hidden">
+  <div class="fit-probe" id="fit-probe" aria-hidden="true"></div>
   <div class="rv-left">
     <div class="pbar" id="rv-top"></div>
     <div class="board-wrap">
       <div class="evalbar" id="evalbar"><div class="white" id="evalbar-white"></div><div class="val" id="evalbar-val"></div></div>
       <div class="board" id="board" aria-label="Chess board"></div>
+      <button class="resize" id="board-resize" type="button" aria-label="Resize the board" title="Drag to resize the board. Double-click to fit the screen again.">
+        <svg viewBox="0 0 14 14" aria-hidden="true"><path d="M13 5 5 13M13 9l-4 4"/></svg></button>
     </div>
     <div class="pbar" id="rv-bottom"></div>
   </div>

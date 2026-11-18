@@ -18,6 +18,11 @@ else:
     _wrapper.write_text(f'#!/bin/sh\nexec "{sys.executable}" "{_engine_py}"\n')
     _wrapper.chmod(_wrapper.stat().st_mode | stat.S_IEXEC)
 os.environ["STOCKFISH_PATH"] = str(_wrapper)
+# Usage totals: a throwaway file, and never the real Hugging Face dataset
+import tempfile  # noqa: E402
+os.environ["STATS_FILE"] = str(Path(tempfile.mkdtemp()) / "stats.json")
+for _var in ("HF_TOKEN", "STATS_REPO", "SPACE_AUTHOR_NAME"):
+    os.environ.pop(_var, None)
 
 from fastapi.testclient import TestClient  # noqa: E402
 
@@ -145,3 +150,30 @@ def test_engine_lines_endpoint():
     data = client.post("/api/analyse", json={"fen": START, "count": 3, "quality": "fast"}).json()
     assert data["status"] == "ongoing" and 1 <= len(data["lines"]) <= 3
     assert data["lines"][0]["san"] and "text" in data["lines"][0]["eval"]
+
+
+# ---------------------------------------------------------------- public numbers
+def test_presence_heartbeat_counts_users_and_online_tabs():
+    before = client.get("/api/stats").json()
+    res = client.post("/api/presence", json={"visitor": "v-test-0001", "tab": "t-test-0001", "first": True})
+    assert res.status_code == 200 and res.headers["cache-control"] == "no-store"
+    body = res.json()
+    assert body["counted"] is True
+    assert body["stats"]["users"] == before["users"] + 1 and body["stats"]["online"] >= 1
+    assert client.post("/api/presence/leave", json={"tab": "t-test-0001"}).status_code == 204
+    assert client.post("/api/presence", json={"visitor": "bad id", "tab": "t-test-0001"}).status_code == 422
+
+
+def test_a_finished_review_and_a_board_move_are_counted():
+    before = client.get("/api/stats").json()
+    job = wait_for(client.post("/api/reviews", json={"pgn": "1. e4 e5 2. Nf3 Nc6", "quality": "fast"}).json()["id"])
+    assert job["status"] == "done"
+    after_review = client.get("/api/stats").json()
+    assert after_review["games"] == before["games"] + 1 and after_review["moves"] == before["moves"] + 4
+    client.post("/api/explore", json={"fen": START, "uci": "d2d4", "quality": "fast"})
+    assert client.get("/api/stats").json()["moves"] == after_review["moves"] + 1
+
+
+def test_health_says_where_totals_are_kept():
+    storage = client.get("/api/health").json()["stats_storage"]
+    assert storage["file"] is True and storage["hub"] is None
