@@ -5,7 +5,7 @@ import { setSoundEnabled } from "./sound.js";
 // Only the settings you changed yourself are saved, so everything else follows the defaults, even when they change.
 const KEY = "movelens.prefs.v3";
 const OLD_KEY = "movelens.prefs.v2";         // older versions saved every setting, chosen or not
-export const DEFAULTS = { scene: "slate", board: "green", pieces: "cburnett", view: "auto", me: "", sound: true, depth: "deep", boardScale: 1 };
+export const DEFAULTS = { scene: "slate", board: "green", pieces: "cburnett", view: "auto", me: "", sound: true, depth: "fast", boardScale: 1 };
 const OLD_DEFAULTS = { scene: "sky", board: "sky", pieces: "cburnett", view: "auto", me: "", sound: true, depth: "deep" };
 export const MIN_BOARD_SCALE = 0.3;
 

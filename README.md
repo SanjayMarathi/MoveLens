@@ -23,7 +23,7 @@ short_description: Free chess game review with a playable analysis board
 ![Stockfish](https://img.shields.io/badge/Stockfish-19-4a7c3a)
 ![PWA](https://img.shields.io/badge/PWA-offline--first-5A0FC8?logo=pwa&logoColor=white)
 ![Docker](https://img.shields.io/badge/Docker-ready-2496ED?logo=docker&logoColor=white)
-![Tests](https://img.shields.io/badge/tests-104%20passing-3fb950)
+![Tests](https://img.shields.io/badge/tests-105%20passing-3fb950)
 
 **Live:** ![games reviewed](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.games&label=games%20reviewed&color=81b64c&cacheSeconds=600) ![moves analysed](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.moves&label=moves%20analysed&color=81b64c&cacheSeconds=600) ![users](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.users&label=users&color=5c8bb0&cacheSeconds=600) ![online now](https://img.shields.io/badge/dynamic/json?url=https%3A%2F%2Fsanjaymarathi-movelens.hf.space%2Fapi%2Fstats&query=%24.online&label=online%20now&color=1baca6&cacheSeconds=600)
 
@@ -121,8 +121,9 @@ Click **Try a famous game** for an instant demo (it needs no engine). Run the te
 
 | Depth | Search | Measured on a 47-move (94-ply) game |
 |---|---|---|
-| Fast, Standard | 12 / 16 ply | faster than Deep |
-| **Deep** (default) | 20 ply | **115 s** on the free Hugging Face CPU (2 vCPUs) |
+| **Fast** (default) | 12 ply | **about 13 s** on the free Hugging Face CPU (2 vCPUs; 0.15 s per move) |
+| Standard | 16 ply | between Fast and Deep |
+| Deep | 20 ply | 115 s on the free Hugging Face CPU |
 | Maximum | 24 ply | 190 s on 4 threads (not offered on 2 vCPUs) |
 
 ## Deploy
@@ -165,7 +166,7 @@ app/            FastAPI server, chess rules engine, PGN parser, UCI client, clas
                 live-board logic, Chess.com/Lichess importer, host detection, public usage numbers
 static/         index.html, css/, js/ (ES modules), sw.js (service worker), pieces/ (SVG sets), bg/ (scenes)
 data/           3,800 named openings (Lichess, public domain)
-tests/          pytest suite (96 tests), stand-in UCI engine, service-worker tests (Node)
+tests/          pytest suite (97 tests), stand-in UCI engine, service-worker tests (Node)
 ml/             optional rating-estimator dataset builder and trainer
 tools/          scripts that draw the scene backgrounds and app icons
 docs/           HOW_IT_WORKS.md (guided tour), DEPLOY.md

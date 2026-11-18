@@ -114,6 +114,11 @@ def test_quality_is_capped_by_server_setting(monkeypatch):
     assert res.json()["quality"] == "standard"
 
 
+def test_fast_is_the_default_depth():
+    res = client.post("/api/reviews", json={"pgn": "1. e4"})
+    assert res.status_code == 200 and res.json()["quality"] == "fast"
+
+
 def test_unknown_review():
     assert client.get("/api/reviews/nope").status_code == 404
 

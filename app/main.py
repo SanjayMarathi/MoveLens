@@ -4,7 +4,7 @@ Web server (FastAPI).
 Reviewing a game takes from a few seconds to a few minutes (one engine search per position), too long
 for a single HTTP request. So reviews run as background JOBS:
 
-    POST /api/reviews        {"pgn": "...", "quality": "deep"}  -> {"id": "...", "status": "queued"}
+    POST /api/reviews        {"pgn": "...", "quality": "fast"}  -> {"id": "...", "status": "queued"}
     GET  /api/reviews/{id}   -> {"status": "running", "progress": {"done": 31, "total": 80}}
                              -> {"status": "done", "result": {...the annotated game...}}
 
@@ -261,7 +261,7 @@ def run_live(quality: str, work: Callable[[Callable[[str, int], List[EngineLine]
 # --------------------------------------------------------------------------- API
 class ReviewRequest(BaseModel):
     pgn: str = Field(..., description="PGN text or a plain move list like '1. e4 e5 2. Nf3'")
-    quality: Literal["fast", "standard", "deep", "max"] = "deep"
+    quality: Literal["fast", "standard", "deep", "max"] = "fast"
 
 
 class FenRequest(BaseModel):

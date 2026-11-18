@@ -140,7 +140,7 @@ Open the direct link and tick off:
 - [ ] `https://YOUR_USERNAME-movelens.hf.space/api/stats` shows the totals, and `"online"` is at least 1 while the page is open.
 - [ ] `https://YOUR_USERNAME-movelens.hf.space/api/health` shows `"engine_name":"Stockfish 19"` and `"engine_found":true`.
 - [ ] **Try a famous game** opens instantly and you can play a move on the board.
-- [ ] Paste a short game (or use the Chess.com tab with your username) and press **Review game**. The progress bar should move. At **Deep** a 40-move game takes roughly 1.5 to 3 minutes on the free server.
+- [ ] Paste a short game (or use the Chess.com tab with your username) and press **Review game**. The progress bar should move. At the default **Fast** depth a 40-move game takes about 10 to 15 seconds on the free server (Deep: roughly 1.5 to 3 minutes).
 - [ ] Reload the page: the review comes back exactly where you left it.
 
 ## 9. Updating the app later
@@ -216,7 +216,7 @@ PRO does **not** include free upgraded CPU. Faster hardware is billed per hour o
 | Build fails at the Stockfish download | Press **Factory rebuild** (Space *Settings*) to retry. The image falls back to Debian's older Stockfish automatically if the download fails, so the app still starts. |
 | Status **Runtime error** | Open **Logs → Container** and read the last lines. Most often a mistyped variable value. |
 | The page is blank inside huggingface.co | Open the **direct `.hf.space` link** instead. |
-| Reviews feel slow | Pick **Standard** (about 30 seconds) or **Fast** in the depth menu. Or set the Space variable `MAX_QUALITY=standard` so visitors get the quicker depth by default. |
+| Reviews feel slow | **Fast** is the default (about 10 to 15 seconds a game). If many visitors choose Deep and the queue fills up, set the Space variable `MAX_QUALITY=standard` to cap the depth. |
 | "The server is waking up" note | Normal after a quiet spell on free hardware. It disappears by itself within about a minute. |
 | "The server is busy" | Six reviews are already waiting. Try again in a few minutes. |
 | The numbers on the front page went back to zero | The Space restarted without the `HF_TOKEN` secret from step 6b, or the token can't write to the dataset. Open `/api/health` and the Space logs (lines starting `[movelens]`). |

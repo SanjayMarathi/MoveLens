@@ -10,9 +10,9 @@ const state = { src: "pgn", games: [], selected: null, imported: null };   // im
 let handlers = {};
 
 const DEPTH_HINT = {
-  fast: "Depth 12 · a quick scan, about 10 seconds for a typical game.",
+  fast: "Depth 12 · the default: a typical game is reviewed in about 10–15 seconds.",
   standard: "Depth 16 · balanced, about 30 seconds.",
-  deep: "Depth 20 · strong analysis, about 1–2 minutes. Recommended.",
+  deep: "Depth 20 · stronger analysis, about 1–2 minutes.",
   max: "Depth 24 · the strongest setting, about 3–5 minutes on a fast server.",
 };
 const QUALITY_ORDER = ["fast", "standard", "deep", "max"];

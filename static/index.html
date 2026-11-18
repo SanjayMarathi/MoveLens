@@ -140,9 +140,9 @@
         <small class="field wide" id="view-hint" style="grid-column:1/-1;margin-top:-6px"></small>
         <label class="field wide"><span>Analysis depth</span>
           <select id="quality">
-            <option value="fast">Fast: quick look</option>
+            <option value="fast" selected>Fast: quick review (default)</option>
             <option value="standard">Standard: balanced</option>
-            <option value="deep" selected>Deep: strong (recommended)</option>
+            <option value="deep">Deep: strong, slower</option>
             <option value="max">Maximum: strongest, slowest</option>
           </select><small id="depth-hint"></small></label>
       </div>
@@ -168,7 +168,7 @@
         <p>Paste its PGN, upload a file, or type your username under the Chess.com or Lichess tab and pick a recent game.</p>
         <ul><li><b>Chess.com:</b> open the game → <i>Share</i> → <i>PGN</i> → Copy.</li><li><b>Lichess:</b> open the game → the <i>PGN</i> tab under the board → Copy.</li></ul></div>
       <div class="step"><div class="ico"><svg><use href="#i-flip"/></svg></div><h3>Choose your view</h3>
-        <p>Enter your username and the board opens from your side. Or pick White or Black yourself. Then choose how deep Stockfish should look: Fast for a quick scan, Deep for a strong review, Maximum when you want the best possible answer.</p></div>
+        <p>Enter your username and the board opens from your side. Or pick White or Black yourself. Then choose how deep Stockfish should look: Fast (the default) reviews a game in seconds, Deep looks harder and takes a minute or two, Maximum gives the best possible answer.</p></div>
       <div class="step"><div class="ico"><svg><use href="#i-bulb"/></svg></div><h3>Learn from it</h3>
         <p>Step through the game with the coach, read why a move was a mistake, then play your own moves on the board and get an instant verdict. Use <b>Retry</b> to find the better move yourself.</p></div>
     </div>
@@ -241,7 +241,7 @@
     <details class="faq"><summary>How long does a review take, and what do the depths mean?</summary>
       <p>The engine searches every position of your game. A deeper search finds better moves and takes longer, roughly in proportion to the number of moves. Times below are typical for a 40-move game on a fast computer; a shared free server can be slower.</p>
       <table class="depth"><tr><th>Depth</th><th>Search</th><th>Typical time</th><th>Best for</th></tr>
-        <tr><td>Fast</td><td>12 ply, ≤0.15 s</td><td>≈ 10 s</td><td>A quick scan</td></tr>
+        <tr><td>Fast (default)</td><td>12 ply, ≤0.15 s</td><td>≈ 10–15 s</td><td>Most games</td></tr>
         <tr><td>Standard</td><td>16 ply, ≤0.4 s</td><td>≈ 30 s</td><td>Everyday review</td></tr>
         <tr><td>Deep</td><td>20 ply, ≤1.5 s</td><td>≈ 1–2 min</td><td>Learning from a game</td></tr>
         <tr><td>Maximum</td><td>24 ply, ≤3.5 s</td><td>≈ 3–5 min</td><td>Important games</td></tr></table></details>
