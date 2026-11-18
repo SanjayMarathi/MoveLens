@@ -251,13 +251,15 @@ class Keeper:
         self.stats, self.path, self.hub = stats, path, hub
         self.saved_version = -1
         self.hub_loaded = False
+        self.hub_error: Optional[str] = None                  # why the last Hub read or save failed, for /api/health
         self.last_sync = 0.0
         self.sync_lock = threading.Lock()
         self.stop = threading.Event()
 
     def describe(self) -> dict:
         """Where the totals are kept, for /api/health."""
-        return {"file": bool(self.path), "hub": self.hub.repo if self.hub else None, "hub_ok": self.hub_loaded}
+        return {"file": bool(self.path), "hub": self.hub.repo if self.hub else None,
+                "hub_ok": self.hub_loaded and not self.hub_error, "hub_error": self.hub_error}
 
     def start(self) -> None:
         if self.path:
@@ -298,9 +300,11 @@ class Keeper:
                 remote = self.hub.load()
             except Exception as e:  # noqa: BLE001 - keep serving; try again next round
                 print(f"[movelens] Could not read usage totals from {self.hub.repo}: {e}", flush=True)
+                self.hub_error = f"read failed: {e}"[:300]
                 return
             self.hub_loaded = True
             if not self.stats.adopt(remote):
+                self.hub_error = None
                 return                                         # the Hub already has everything
             with self.stats.lock:
                 totals = {**{k: self.stats.base[k] + sending[k] for k in COUNTERS}, "since": int(self.stats.since)}
@@ -308,6 +312,8 @@ class Keeper:
                 self.hub.save(totals)
             except Exception as e:  # noqa: BLE001
                 print(f"[movelens] Could not save usage totals to {self.hub.repo}: {e}", flush=True)
+                self.hub_error = f"save failed: {e}"[:300]
                 return
+            self.hub_error = None
             self.stats.saved(sending, totals)
         self.save_file()                                       # so a restart can't count the same moves twice

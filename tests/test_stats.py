@@ -149,3 +149,20 @@ def test_a_restart_after_a_hub_save_does_not_count_twice(tmp_path):
     keeper2.flush()
     assert again.totals()["games"] == 1 and hub.saved["games"] == 1
     assert hub.writes == writes                          # nothing new to say: no commit
+
+
+class RefusingHub(FakeHub):
+    def save(self, data):
+        raise PermissionError("403 Forbidden: this token cannot write to someone/movelens-stats")
+
+
+def test_health_reports_a_hub_that_refuses_saves():
+    keeper = Keeper(Stats(), None, RefusingHub())
+    keeper.start()                                       # nothing saved yet, so it tries to save at once
+    status = keeper.describe()
+    assert status["hub_ok"] is False and "403" in status["hub_error"]
+
+    working = Keeper(Stats(), None, FakeHub())
+    working.start()
+    assert working.describe() == {"file": False, "hub": "someone/movelens-stats", "hub_ok": True, "hub_error": None}
+
